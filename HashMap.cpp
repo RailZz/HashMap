@@ -9,6 +9,9 @@
 template<class KeyType, class ValueType, class Hash = std::hash<KeyType>>
 class HashMap {
 public:
+
+    typedef std::pair<const KeyType, ValueType> element;
+
     HashMap(Hash _hasher = Hash{}) : hasher_(_hasher) {
         real_size_ = 0;
         setOptimalSize();
@@ -27,7 +30,7 @@ public:
         setIterators();
     }
 
-    HashMap(std::initializer_list<std::pair<const KeyType, ValueType>> init_list,
+    HashMap(std::initializer_list<element> init_list,
         Hash _hasher = Hash{})
         : HashMap(init_list.begin(), init_list.end(), _hasher) {}
 
@@ -43,16 +46,16 @@ public:
         return hasher_;
     }
 
-    void insert(const std::pair<const KeyType, ValueType>& add) {
-        if (find(add.first) == end()) {
+    void insert(const element& value) {
+        if (find(value.first) == end()) {
             real_size_++;
-            data_.push_front(add);
+            data_.push_front(value);
             if (size() == current_size_ * 2) {
                 current_size_ *= 2;
                 resize(current_size_);
                 setIterators();
             } else {
-                buckets_[getPos(add.first)].push_back(data_.begin());
+                buckets_[getPos(value.first)].push_back(data_.begin());
             }
         }
     }
@@ -69,8 +72,8 @@ public:
         }
     }
 
-    typedef typename std::list<std::pair<const KeyType, ValueType>>::iterator iterator;
-    typedef typename std::list<std::pair<const KeyType, ValueType>>::const_iterator const_iterator;
+    typedef typename std::list<element>::iterator iterator;
+    typedef typename std::list<element>::const_iterator const_iterator;
 
     iterator begin() {
         return data_.begin();
@@ -153,7 +156,7 @@ public:
 private:
     size_t real_size_;
     size_t current_size_;
-    std::list<std::pair<const KeyType, ValueType>> data_;
+    std::list<element> data_;
     std::vector<std::list<iterator>> buckets_;
     Hash hasher_;
 
